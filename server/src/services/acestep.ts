@@ -141,6 +141,12 @@ async function buildGradioArgs(params: GenerationParams): Promise<unknown[]> {
   const referenceAudio = await prepareAudioFile(params.referenceAudioUrl);
   const sourceAudio = await prepareAudioFile(params.sourceAudioUrl);
 
+  // Guard: cover/repaint modes require source audio to be loadable
+  const needsSource = params.taskType === 'cover' || params.taskType === 'audio2audio' || params.taskType === 'repaint';
+  if (needsSource && params.sourceAudioUrl && sourceAudio === null) {
+    throw new Error(`Source audio file could not be loaded from: ${params.sourceAudioUrl}. Make sure the file was uploaded successfully.`);
+  }
+
   // CoT features are gated by enhance OR thinking (either enables LLM enrichment)
   const useCot = isEnhance || isThinking;
 
